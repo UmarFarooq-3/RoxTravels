@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: black;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        #summary {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .form-container button {
+            background-color: rgb(255, 215, 0);
+            color: black;
+            padding: 11px;
+            border: none;
+            cursor: pointer;
+            border-radius: 18px;
+            font-weight: bolder;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-top: 10px;
+            font-size: 15px;
+            width: 18%;
+        }
+
+        .form-container button:hover {
+            background: black;
+            color: white;
+            transition: 1s;
+        }
+    </style>
+    <script>
+        function updateSummary() {
+            const tourDropdown = document.getElementById('tourDropdown');
+            const pageName = tourDropdown.options[tourDropdown.selectedIndex].text;
+            const bookingHolder = document.getElementById('bookingHolder').value;
+            const adults = parseInt(document.getElementById('adults').value) || 0;
+            const children = parseInt(document.getElementById('children').value) || 0;
+            const youth = parseInt(document.getElementById('youth').value) || 0;
+            const infant = parseInt(document.getElementById('infant').value) || 0;
+            const seniors = parseInt(document.getElementById('seniors').value) || 0;
+            const date = document.getElementById('date').value;
+            const email = document.getElementById('email').value;
+            const note = document.getElementById('note').value;
+            const pricePerPersonElement = document.getElementById('pricePerPerson');
+            const totalPriceElement = document.getElementById('totalPrice');
+
+            const currentDate = new Date().toLocaleDateString();
+            const currentTime = new Date().toLocaleTimeString();
+
+            // Price per person for different tours
+            const tourPrices = {
+                'Capadocia Red Tour': 60,
+                'Capadocia Turkish Night show':55,
+                'Capadocia Standard Baloon Riding':170,
+                'Capadocia Exclusive Baloon Riding':210,
+                'Capadocia Extra Exclusive Baloon Riding':240,
+                'Capadocia Camel Riding':55,
+                'Capadocia Hourse Riding':55,
+                'Capadocia Private Airport transfer':90,
+                'Capadocia Regular Airport transfer':18,
+                'Capadocia Green Tour':65,
+                'Capadocia Jeep Safari':120,
+                'Capadocia Turkish Bath':120,
+                'Capadocia Mix tour':170,
+                'Capadocia Salt Lake':80,
+                'Capadocia Bike Riding':40,
+                'Capadocia Classic Car Tour':120,
+                'Capadocia Dervish Show':35,
+                'Antalya Land of Legends Theme Park' : 75,
+                'Antalya Full Private Turkish Bath':110,
+                'Antalya Turkish Bath':55,
+                'Antalya Diving Tour With lunch & Transfer':65,
+                'Antalya Private Airport transfer':65,
+                'Antalya Land of Legend Night Show':34,
+                'Antalya Pamukkale Full Package (Tickets & Lunch)':60,
+                'Bodrum Kos Island Tour':65,
+                'Bodrum Boat Tour':50,
+                'Bodrum ATV Bikes Riding':55,
+                'Bodrum Patmos Day trip':105,
+                'Bodrum Private Airport Transfer':85,
+                'Bodrum Turkish Bath':55,
+                'Bodrum Scuba Diving Tour':68,
+                'Bodrum Symi Day Trip':115,
+                'Bodrum Ephesus Tour':65,
+                'Bodrum Rafting Tour':90,
+                'Bodrum Rhodes Day trip':115,
+                'Istanbul Bosphorus Dinner Cruise with Turkish Night Show':50,
+                'Istanbul Bursa Day Tour':50,
+                'Istanbul City Tour 1':75,
+                'Istanbul City Tour 2':75,
+                'Istanbul Prince Land Tour':55,
+                'Istanbul Turkish Night Show & Dinner':70,
+                'Istanbul Private Airport Service':80,
+                'Istanbul Turkish Bath':95,
+
+            };
+            let pricePerPerson = 0;
+    let totalPrice = 0;
+
+            if(pageName === 'Antalya Private Airport transfer'
+                 || pageName === 'Capadocia Jeep Safari'
+                 || pageName === 'Capadocia Classic Car Tour'
+                  || pageName === 'Capadocia Private Airport transfer'
+              || pageName === 'Istanbul Private Airport Service'
+                 || pageName === 'Bodrum Private Airport Transfer'        
+            ){
+                const totalPrice = tourPrices[pageName] || 0;
+
+pricePerPersonElement.innerText = `€${totalPrice}`;
+totalPriceElement.innerText = `€${totalPrice}`;
+
+                const detailsText = `------------------ Booking Details ------------------\n\n` +
+                `Tour Name: ${pageName}\n` +
+                `Booking Held By: ${bookingHolder}\n` +
+                `Total Price: $${totalPrice}\n\n` +
+                `Guests:\n` +
+                `   Adults: ${adults}\n` +
+                `   Children: ${children}\n` +
+                `   Youth: ${youth}\n` +
+                `   Infants: ${infant}\n` +
+                `   Seniors: ${seniors}\n\n` +
+                `Date: ${date}\n` +
+                `Contact Information:\n` +
+                `   Email: ${email}\n` +
+                `   Note: ${note}\n\n` +
+                `------------------ Current Date and Time ------------------\n\n` +
+                `Current Date: ${currentDate}\n` +
+                `Current Time: ${currentTime}`;
+
+            document.getElementById('summary-text').innerText = `Booking details for ${pageName}`;
+            document.getElementById('details-text').innerText = detailsText;
+
+            // Check reservation date and display error if less than 72 hours
+            const reservationDate = new Date(date);
+            const hoursDifference = Math.floor((reservationDate - new Date()) / (1000 * 60 * 60));
+            const errorMessage = document.getElementById('error-message');
+
+            if (hoursDifference < 72) {
+                errorMessage.innerText = 'Error: Reservations must be made at least 72 hours in advance.';
+            } else {
+                errorMessage.innerText = ''; // Clear error message
+            }
+
+            }else{
+
+            let pricePerPerson = tourPrices[pageName] || 0;
+
+            const totalAdults = adults * pricePerPerson;
+            const totalChildren = children * pricePerPerson;
+            const totalYouth = youth * pricePerPerson;
+            const totalSeniors = seniors * pricePerPerson;
+
+            const totalPrice = totalAdults + totalChildren + totalYouth + totalSeniors;
+            pricePerPersonElement.innerText = `€${pricePerPerson}`;
+            totalPriceElement.innerText = `€${totalPrice}`;
+
+            const detailsText = `------------------ Booking Details ------------------\n\n` +
+                `Tour Name: ${pageName}\n` +
+                `Booking Held By: ${bookingHolder}\n` +
+                `Price per Person: $${pricePerPerson}\n` +
+                `Total Price: $${totalPrice}\n\n` +
+                `Guests:\n` +
+                `   Adults: ${adults}\n` +
+                `   Children: ${children}\n` +
+                `   Youth: ${youth}\n` +
+                `   Infants: ${infant}\n` +
+                `   Seniors: ${seniors}\n\n` +
+                `Date: ${date}\n` +
+                `Contact Information:\n` +
+                `   Email: ${email}\n` +
+                `   Note: ${note}\n\n` +
+                `------------------ Current Date and Time ------------------\n\n` +
+                `Current Date: ${currentDate}\n` +
+                `Current Time: ${currentTime}`;
+
+            document.getElementById('summary-text').innerText = `Booking details for ${pageName}`;
+            document.getElementById('details-text').innerText = detailsText;
+
+            // Check reservation date and display error if less than 72 hours
+            const reservationDate = new Date(date);
+            const hoursDifference = Math.floor((reservationDate - new Date()) / (1000 * 60 * 60));
+            const errorMessage = document.getElementById('error-message');
+
+            if (hoursDifference < 72) {
+                errorMessage.innerText = 'Error: Reservations must be made at least 72 hours in advance.';
+            } else {
+                errorMessage.innerText = ''; // Clear error message
+            }
+        }
+    }
+
+        function setInitialPageName() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tourNameParam = urlParams.get('tourName');
+
+            const referringPage = document.referrer;
+            const referringTourName = referringPage ? referringPage.split('?tourName=')[1] : null;
+
+            const initialTourName = tourNameParam || referringTourName;
+
+            if (initialTourName) {
+                const tourDropdown = document.getElementById('tourDropdown');
+                const option = document.createElement('option');
+                option.value = initialTourName;
+                option.text = decodeURIComponent(initialTourName);
+                tourDropdown.add(option);
+                tourDropdown.value = initialTourName;
+            }
+        }
+
+        window.onload = function () {
+            setInitialPageName();
+            updateSummary();
+        };
+        function submitForm() {
+            alert('Form submitted!');
+        }
+
+        function resetForm(event) {
+            event.preventDefault(); // Prevent form from resetting before running reset logic
+            // Add your reset logic here
+            document.getElementById('bookingHolder').value = '';
+            document.getElementById('adults').value = '';
+            document.getElementById('children').value = '';
+            document.getElementById('youth').value = '';
+            document.getElementById('infant').value = '';
+            document.getElementById('seniors').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('note').value = '';
+            updateSummary(); // Update summary after resetting
+        }
+    </script>
+</head>
+
+<body>
+
+    <div class="form-container">
+        <h1 style="color:rgb(255,215,0) ;">Reservation Form</h1>
+
+        <label for="tourDropdown">Tour Name:</label>
+        <select id="tourDropdown" onchange="updateSummary()">
+            <!-- Add options for each tour -->
+            <option value="Capadocia Red Tour">Capadocia Red Tour</option>
+<option value="Capadocia Turkish Night show">Capadocia Turkish Night show</option>
+<option value="Capadocia Standard Baloon Riding">Capadocia Standard Baloon Riding</option>
+<option value="Capadocia Exclusive Baloon Riding">Capadocia Exclusive Baloon Riding</option>
+<option value="Capadocia Extra Exclusive Baloon Riding">Capadocia Extra Exclusive Baloon Riding</option>
+<option value="Capadocia Camel Riding">Capadocia Camel Riding</option>
+<option value="Capadocia Hourse Riding">Capadocia Hourse Riding</option>
+<option value="Capadocia Private Airport transfer">Capadocia Private Airport transfer</option>
+<option value="Capadocia Regular Airport transfer">Capadocia Regular Airport transfer</option>
+<option value="Capadocia Green Tour">Capadocia Green Tour</option>
+<option value="Capadocia Jeep Safari">Capadocia Jeep Safari</option>
+<option value="Capadocia Turkish Bath">Capadocia Turkish Bath</option>
+<option value="Capadocia Mix tour">Capadocia Mix tour</option>
+<option value="Capadocia Salt Lake">Capadocia Salt Lake</option>
+<option value="Capadocia Bike Riding">Capadocia Bike Riding</option>
+<option value="Capadocia Classic Car Tour">Capadocia Classic Car Tour</option>
+<option value="Capadocia Dervish Show">Capadocia Dervish Show</option>
+<option value="Antalya Land of Legends Theme Park">Antalya Land of Legends Theme Park</option>
+<option value="Antalya Full Private Turkish Bath">Antalya Full Private Turkish Bath</option>
+<option value="Antalya Turkish Bath">Antalya Turkish Bath</option>
+<option value="Antalya Diving Tour With lunch & Transfer">Antalya Diving Tour With lunch & Transfer</option>
+<option value="Antalya Private Airport transfer">Antalya Private Airport transfer</option>
+<option value="Antalya Land of Legend Night Show">Antalya Land of Legend Night Show</option>
+<option value="Antalya Pamukkale Full Package (Tickets & Lunch)">Antalya Pamukkale Full Package (Tickets & Lunch)</option>
+<option value="Bodrum Kos Island Tour">Bodrum Kos Island Tour</option>
+<option value="Bodrum Boat Tour">Bodrum Boat Tour</option>
+<option value="Bodrum ATV Bikes Riding">Bodrum ATV Bikes Riding</option>
+<option value="Bodrum Patmos Day trip">Bodrum Patmos Day trip</option>
+<option value="Bodrum Private Airport Transfer">Bodrum Private Airport Transfer</option>
+<option value="Bodrum Turkish Bath">Bodrum Turkish Bath</option>
+<option value="Bodrum Scuba Diving Tour">Bodrum Scuba Diving Tour</option>
+<option value="Bodrum Symi Day Trip">Bodrum Symi Day Trip</option>
+<option value="Bodrum Ephesus Tour">Bodrum Ephesus Tour</option>
+<option value="Bodrum Rafting Tour">Bodrum Rafting Tour</option>
+<option value="Bodrum Rhodes Day trip">Bodrum Rhodes Day trip</option>
+<option value="Istanbul Bosphorus Dinner Cruise with Turkish Night Show">Istanbul Bosphorus Dinner Cruise with Turkish Night Show</option>
+<option value="Istanbul Bursa Day Tour">Istanbul Bursa Day Tour</option>
+<option value="Istanbul City Tour 1">Istanbul City Tour 1</option>
+<option value="Istanbul City Tour 2">Istanbul City Tour 2</option>
+<option value="Istanbul Prince Land Tour">Istanbul Prince Land Tour</option>
+<option value="Istanbul Turkish Night Show & Dinner">Istanbul Turkish Night Show & Dinner</option>
+<option value="Istanbul Private Airport Service">Istanbul Private Airport Service</option>
+<option value="Istanbul Turkish Bath">Istanbul Turkish Bath</option>
+            <!-- Add more tours here -->
+        </select>
+
+        <label for="bookingHolder">Booking Held By:</label>
+        <input type="text" id="bookingHolder" oninput="updateSummary()" placeholder="Enter booking holder's name">
+
+        <label for="adults">Adults:</label>
+        <input type="number" id="adults" oninput="updateSummary()" placeholder="Enter number of adults">
+
+        <label for="children">Children:</label>
+        <input type="number" id="children" oninput="updateSummary()" placeholder="Enter number of children">
+
+        <label for="youth">Youth:</label>
+        <input type="number" id="youth" oninput="updateSummary()" placeholder="Enter number of youth">
+
+        <label for="infant">Infants:</label>
+        <input type="number" id="infant" oninput="updateSummary()" placeholder="Enter number of infants">
+
+        <label for="seniors">Seniors:</label>
+        <input type="number" id="seniors" oninput="updateSummary()" placeholder="Enter number of seniors">
+
+        <label for="date">Reservation Date:</label>
+        <input type="date" id="date" oninput="updateSummary()" onchange="updateSummary()">
+        <div id="error-message"></div>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" oninput="updateSummary()" placeholder="Enter your email">
+
+        <div class="form-row">
+            <div>
+                <label for="pricePerPerson" style="color: white;">Price Per Person:</label>
+                <span id="pricePerPerson" style="color: white;"></span>
+            </div>
+            <div>
+                <label for="totalPrice" style="color: white;">Total Price:</label>
+                <span id="totalPrice" style="color: white;"></span>
+            </div>
+        </div>
+        <label for="note">Last Note:</label>
+        <textarea id="note" rows="4" oninput="updateSummary()" placeholder="Additional notes"></textarea>
+
+        <div id="summary">
+            <h3 id="summary-text" style="color: rgb(255, 215, 0);">Booking details for [Tour Name]</h3>
+            <pre id="details-text" style="color: white; white-space: pre-wrap;"></pre>
+        </div>
+
+        <button type="submit" onclick="SendMail()">Submit</button>
+        <button type="reset" onclick="resetForm(event)">Reset</button>
+    </div>
+    <script src = "js/reservefromhomemail.js" type="text/javascript" ></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init({
+        publicKey: "wJz8ob1tPq1qHT4fC",
+      });
+   })();
+</script>
+
+</body>
+
+</html>

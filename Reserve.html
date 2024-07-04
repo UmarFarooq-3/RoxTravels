@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: black;
+        }
+     
+    </style>
+    <script>
+        function updateSummary() {
+            const pageName = document.getElementById('pageName').value;
+            const bookingHolder = document.getElementById('bookingHolder').value;
+            const adults = parseInt(document.getElementById('adults').value) || 0;
+            const children = parseInt(document.getElementById('children').value) || 0;
+            const youth = parseInt(document.getElementById('youth').value) || 0;
+            const infant = parseInt(document.getElementById('infant').value) || 0;
+            const seniors = parseInt(document.getElementById('seniors').value) || 0;
+            const date = document.getElementById('date').value;
+            const email = document.getElementById('email').value;
+            const note = document.getElementById('note').value;
+            const totalPriceElement = document.getElementById('totalPrice');
+
+            const currentDate = new Date().toLocaleDateString();
+            const currentTime = new Date().toLocaleTimeString();
+
+            // Price per person for different tours
+            const totalPrice = 30;
+
+            const detailsText = `------------------ Booking Details ------------------\n\n` +
+                `Tour Name: ${pageName}\n` +
+                `Booking Held By: ${bookingHolder}\n` +
+                `Total Price: € ${totalPrice}\n\n` +
+                `Guests:\n` +
+                `   Adults: ${adults}\n` +
+                `   Children: ${children}\n` +
+                `   Youth: ${youth}\n` +
+                `   Infants: ${infant}\n` +
+                `   Seniors: ${seniors}\n\n` +
+                `Reservation Date: ${date}\n` +
+                `Contact Information:\n` +
+                `   Email: ${email}\n` +
+                `   Note: ${note}\n\n` +
+                `------------------ Current Date and Time ------------------\n\n` +
+                `Current Date: ${currentDate}\n` +
+                `Current Time: ${currentTime}`;
+
+            document.getElementById('summary-text').innerText = `Reservation details for ${pageName}`;
+            document.getElementById('details-text').innerText = detailsText;
+
+            // Check reservation date and display error if less than 72 hours
+            const reservationDate = new Date(date);
+            const hoursDifference = Math.floor((reservationDate - new Date()) / (1000 * 60 * 60));
+            const errorMessage = document.getElementById('error-message');
+
+            if (hoursDifference < 72) {
+                errorMessage.innerText = 'Error: Reservations must be made at least 72 hours in advance.';
+            } else {
+                errorMessage.innerText = ''; // Clear error message
+            }
+        }
+
+        function setInitialPageName() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tourNameParam = urlParams.get('tourName');
+
+            const referringPage = document.referrer;
+            const referringTourName = referringPage ? referringPage.split('?tourName=')[1] : null;
+
+            const initialTourName = tourNameParam || referringTourName;
+
+            if (initialTourName) {
+                document.getElementById('pageName').value = decodeURIComponent(initialTourName);
+            }
+        }
+
+        window.onload = function () {
+            setInitialPageName();
+            updateSummary();
+        };
+    </script>
+</head>
+
+<body>
+
+    <div class="form-container">
+        <h1 style="color:rgb(255,215,0) ;">Reservation Form</h1>
+
+        <div class="form-row">
+            <div>
+                <label for="pageName">Tour Name:</label>
+                <input type="text" id="pageName" oninput="updateSummary()" placeholder="Enter tour name"
+                    onchange="updateSummary()">
+            </div>
+            <div>
+                <label for="bookingHolder">Booking Held By:</label>
+                <input type="text" id="bookingHolder" oninput="updateSummary()" placeholder="Enter booking holder's name">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div>
+                <label for="adults">Number of Adults:</label>
+                <input type="number" id="adults" oninput="updateSummary()" placeholder="Enter number of adults">
+            </div>
+            <div>
+                <label for="children">Number of Children:</label>
+                <input type="number" id="children" oninput="updateSummary()" placeholder="Enter number of children">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div>
+                <label for="youth">Number of Youth:</label>
+                <input type="number" id="youth" oninput="updateSummary()" placeholder="Enter number of youth">
+            </div>
+            <div>
+                <label for="seniors">Number of Seniors:</label>
+                <input type="number" id="seniors" oninput="updateSummary()" placeholder="Enter number of seniors">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div>
+                <label for="infant">Number of Infants:</label>
+                <input type="number" id="infant" oninput="updateSummary()" placeholder="Enter number of infants">
+            </div>
+            <div>
+                <label for="date">Reservation Date:</label>
+                <input type="date" id="date" oninput="updateSummary()" onchange="updateSummary()">
+                <div id="error-message"></div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="full-width">
+                <label for="email">Email:</label>
+                <input type="email" id="email" oninput="updateSummary()" placeholder="Enter your email">
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label for="totalPrice" style="color: white;">Total Price: 30€</label>
+                <span id="totalPrice" style="color: white;"></span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="full-width">
+                <label for="note">Last Note:</label>
+                <textarea id="note" rows="4" oninput="updateSummary()" placeholder="Additional notes"></textarea>
+            </div>
+        </div>
+
+        <div id="summary">
+            <h3 id="summary-text" style="color: rgb(255, 215, 0);">Booking details for [Tour Name]</h3>
+            <pre id="details-text" style="color: white; white-space: pre-wrap;"></pre>
+        </div>
+
+        
+            <div class="button-container" >
+                <button type="submit" onclick=" SendMail()">Submit</button>
+        <button type="reset" onclick="resetForm(event)">Reset</button>
+            </div>
+        </div>
+
+
+    <script>
+        function submitForm() {
+            alert('Form submitted!');
+        }
+
+        function resetForm(event) {
+    event.preventDefault(); // Prevent form from resetting before running reset logic
+    // Add your reset logic here
+    document.getElementById('bookingHolder').value = '';
+    document.getElementById('adults').value = '';
+    document.getElementById('children').value = '';
+    document.getElementById('youth').value = '';
+    document.getElementById('infant').value = '';
+    document.getElementById('seniors').value = '';
+    document.getElementById('date').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('note').value = '';
+    updateSummary(); // Update summary after resetting
+}
+    </script>
+    <script src = "js/reservemail.js" type="text/javascript" ></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init({
+        publicKey: "wJz8ob1tPq1qHT4fC",
+      });
+   })();
+</script>
+
+</body>
+
+</html>
